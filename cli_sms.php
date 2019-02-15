@@ -2,18 +2,30 @@
 <?php
 // Version 0.7
 
-// The service you're using. Choices include clickatell, budgetsms, nexmo and clockwork
+// The service you're using. Choices include clickatell, budgetsms, nexmo, clockwork and lox24
 $service = "";
 
 // The API key.
 $apikey = "";
 
-// Username and password. With BudgetSMS use userid as password. Username not needed for Nexmo or Clockwork
+// Username and password. With BudgetSMS use userid as password. Username not needed for Nexmo or Clockwork. For Lox24 the password is the Md5 Hash of it.
 $user = "";
 $password = "";
 
 // The sender name / number. This has to conform to your service provider's regulations.
 $from = "";
+
+//This is for Lox24. The ServiceId is the sms type you will send. The types are visible in your dashboard.
+$serviceId = "";
+
+//This is for Lox24. The SMS Encoding: 0 = GSM Encoding(160 Chars). 1 = Unicode Encoding (70 Chars. For arabic and so on)
+$encoding = "0";
+
+//This is for Lox24. Choose between "send" and "info". Info will just simulate and return infos like price and so on. send will send.
+$action = "send";
+
+//Check for ssl certs. 0=Don't verify,1=DONT USE THAT!,2=Verify
+$sslVerify = 2;
 
 // if debug is true, log files will be generated
 $debug = false;
@@ -82,6 +94,19 @@ switch ($service) {
     );
     $baseurl = 'https://api.clockworksms.com/http/send';
   break;
+  case 'lox24':
+    $apiargs = array(
+      "konto"     => $user,
+      "password"  => $password,
+      "service"   => $serviceId,
+      "text"      => $text,
+      "encoding"  => $encoding,
+      "from"      => $from,
+      "to"        => $to,
+      "action"    => $action,
+    );
+    $baseurl = 'https://www.lox24.eu/API/httpsms.php';
+  break;
 }
 
 $params    = "";
@@ -96,7 +121,7 @@ $url = $baseurl . '?' . $params;
 
 $curl = curl_init();
 curl_setopt($curl, CURLOPT_URL, $url);
-curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $sslVerify);
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 $result = curl_exec($curl);
 
